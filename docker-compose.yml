@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    expose:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=fastapi_database
+  
+  mongodb:
+    image: mongo
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=mongoadmin
+      - MONGO_INITDB_DATABASE=fastapi_database
+  
+  api:
+    build: .
+    depends_on:
+      - db
+    volumes:
+      - ./:/app:ro
+    environment:
+      - DATABASE_URL=postgresql://root:root@db:5432/fastapi_database
+      - MONGO_URL=mongodb+srv://admin:mongoadmin@architecture.umi1w85.mongodb.net/?retryWrites=true&w=majority&appName=architecture
+    ports:
+      - "8000:8000"
+
+volumes:
+  postgres_data:
+  mongodb_data:
